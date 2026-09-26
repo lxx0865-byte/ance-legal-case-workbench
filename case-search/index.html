@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="输入关键词，检索北大法宝真实法律案例，并按案由、地域、程序和年份缩小范围。">
+  <title>法律案例检索｜案策</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23132943'/%3E%3Cpath d='M18 21h28M24 29h16M20 43h24' stroke='%23fff' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='44' cy='21' r='5' fill='%23d6a64f'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #152438;
+      --muted: #657287;
+      --line: #dce3eb;
+      --soft: #f4f7fa;
+      --paper: #ffffff;
+      --navy: #132943;
+      --navy-2: #1d456d;
+      --gold: #b9852f;
+      --danger: #a83d3d;
+      --shadow: 0 18px 48px rgba(25, 45, 72, .10);
+    }
+    * { box-sizing: border-box; }
+    html { font-size: 16px; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: linear-gradient(180deg, #edf3f8 0, #f8fafc 310px, #f8fafc 100%);
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      line-height: 1.65;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; }
+    .topbar {
+      height: 64px;
+      color: #fff;
+      background: var(--navy);
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .topbar-inner {
+      width: min(1180px, calc(100% - 32px));
+      height: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .brand { display: flex; align-items: center; gap: 11px; text-decoration: none; font-weight: 700; }
+    .brand-mark {
+      width: 34px; height: 34px; border: 1px solid rgba(255,255,255,.35); border-radius: 9px;
+      display: grid; place-items: center; color: #f1c976; font-family: Georgia, serif; font-size: 19px;
+    }
+    .brand small { display: block; color: rgba(255,255,255,.65); font-size: .72rem; font-weight: 500; letter-spacing: .08em; }
+    .back { color: rgba(255,255,255,.82); text-decoration: none; font-size: .9rem; }
+    .back:hover { color: #fff; }
+    main { width: min(1180px, calc(100% - 32px)); margin: 0 auto 64px; }
+    .intro { padding: 42px 0 24px; }
+    .eyebrow { margin: 0 0 6px; color: var(--gold); font-size: .78rem; font-weight: 800; letter-spacing: .13em; }
+    h1 { margin: 0; font-family: Georgia, "Songti SC", serif; font-size: clamp(2rem, 4vw, 3.1rem); line-height: 1.2; letter-spacing: -.03em; }
+    .intro p { margin: 11px 0 0; color: var(--muted); font-size: 1rem; }
+    .search-panel {
+      padding: 24px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+    .search-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; }
+    .search-input {
+      width: 100%; min-height: 56px; padding: 0 18px;
+      border: 1px solid #bcc8d6; border-radius: 11px; outline: none;
+      color: var(--ink); background: #fff; font-size: 1rem;
+    }
+    .search-input:focus { border-color: var(--navy-2); box-shadow: 0 0 0 4px rgba(29,69,109,.11); }
+    .search-button {
+      min-width: 142px; min-height: 56px; border: 0; border-radius: 11px;
+      color: #fff; background: var(--navy); font-weight: 700;
+      box-shadow: 0 8px 18px rgba(19,41,67,.18);
+    }
+    .search-button:hover { background: var(--navy-2); }
+    .search-button:disabled { cursor: wait; opacity: .64; }
+    .examples { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+    .examples-label { color: var(--muted); font-size: .84rem; }
+    .keyword-chip {
+      border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px;
+      color: #415169; background: var(--soft); font-size: .82rem;
+    }
+    .keyword-chip:hover { border-color: #97a9bc; background: #fff; }
+    .filters {
+      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px;
+      margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line);
+    }
+    .field label { display: block; margin-bottom: 6px; color: #526177; font-size: .82rem; font-weight: 700; }
+    .field input, .field select {
+      width: 100%; height: 42px; padding: 0 11px; border: 1px solid var(--line); border-radius: 8px;
+      color: var(--ink); background: #fff; outline: none;
+    }
+    .field input:focus, .field select:focus { border-color: var(--navy-2); }
+    .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 22px; margin-top: 22px; align-items: start; }
+    .results-panel, .side-card {
+      background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+    }
+    .results-head {
+      min-height: 66px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; border-bottom: 1px solid var(--line);
+    }
+    .results-head h2 { margin: 0; font-size: 1.03rem; }
+    .results-status { color: var(--muted); font-size: .84rem; text-align: right; }
+    .result-list { padding: 4px 20px 20px; }
+    .empty { min-height: 340px; padding: 56px 24px; display: grid; place-items: center; text-align: center; color: var(--muted); }
+    .empty-icon {
+      width: 58px; height: 58px; margin: 0 auto 16px; display: grid; place-items: center;
+      border-radius: 50%; color: var(--navy); background: #eaf0f6; font-size: 1.45rem;
+    }
+    .empty b { display: block; margin-bottom: 6px; color: var(--ink); font-size: 1rem; }
+    .case-card { padding: 20px 0; border-bottom: 1px solid var(--line); }
+    .case-card:last-child { border-bottom: 0; }
+    .case-no { color: var(--gold); font-family: Georgia, serif; font-size: .78rem; font-weight: 800; letter-spacing: .08em; }
+    .case-card h3 { margin: 3px 0 7px; font-size: 1.05rem; line-height: 1.55; }
+    .case-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font-size: .82rem; }
+    .case-card p { margin: 12px 0; color: #46566a; font-size: .92rem; }
+    .case-link { display: inline-flex; align-items: center; gap: 5px; color: var(--navy-2); font-size: .86rem; font-weight: 700; text-decoration: none; }
+    .case-link:hover { text-decoration: underline; }
+    .side { display: grid; gap: 14px; }
+    .side-card { padding: 18px; }
+    .side-card h2 { margin: 0 0 12px; font-size: .95rem; }
+    .source-link {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      padding: 11px 0; border-bottom: 1px solid var(--line); color: #33465e; text-decoration: none; font-size: .88rem;
+    }
+    .source-link:last-child { border-bottom: 0; }
+    .source-link:hover { color: var(--navy-2); }
+    .query-box { padding: 12px; border-radius: 9px; background: var(--soft); color: #405168; font-size: .82rem; word-break: break-word; }
+    .ghost-button {
+      width: 100%; margin-top: 10px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px;
+      color: var(--navy); background: #fff; font-size: .84rem; font-weight: 700;
+    }
+    .notice { margin: 0; color: var(--muted); font-size: .78rem; }
+    .error { padding: 18px; margin-top: 16px; border: 1px solid #efcaca; border-radius: 10px; color: var(--danger); background: #fff7f7; }
+    .skeleton { height: 128px; margin: 18px 0; border-radius: 10px; background: linear-gradient(90deg, #eef2f6 25%, #f8fafc 37%, #eef2f6 63%); background-size: 400% 100%; animation: shimmer 1.2s infinite; }
+    @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+    @media (max-width: 900px) {
+      .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .workspace { grid-template-columns: 1fr; }
+      .side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 620px) {
+      .topbar { height: 58px; }
+      .topbar-inner, main { width: min(100% - 22px, 1180px); }
+      .brand small { display: none; }
+      .intro { padding: 30px 2px 18px; }
+      .intro p { font-size: .92rem; }
+      .search-panel { padding: 15px; border-radius: 14px; }
+      .search-row { grid-template-columns: 1fr; }
+      .search-button { width: 100%; }
+      .filters { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .field.region { grid-column: 1 / -1; }
+      .results-head { align-items: flex-start; }
+      .result-list { padding-inline: 16px; }
+      .side { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../"><span class="brand-mark">策</span><span>案策<small>LEGAL CASE WORKBENCH</small></span></a>
+      <a class="back" href="../">返回案件分析工作台 →</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <p class="eyebrow">CASE RESEARCH</p>
+      <h1>法律案例检索</h1>
+      <p>输入案由、争议焦点或关键事实，直接检索真实案例；先宽后窄，结果更容易命中。</p>
+    </section>
+
+    <form class="search-panel" id="searchForm">
+      <div class="search-row">
+        <input class="search-input" id="keyword" type="search" maxlength="500" autocomplete="off" placeholder="例如：未签劳动合同 二倍工资 仲裁时效" aria-label="案例检索关键词" required>
+        <button class="search-button" id="searchButton" type="submit">检索案例</button>
+      </div>
+      <div class="examples" id="examples">
+        <span class="examples-label">试试：</span>
+        <button class="keyword-chip" type="button" data-keyword="违法解除劳动合同 赔偿金">违法解除</button>
+        <button class="keyword-chip" type="button" data-keyword="民间借贷 微信转账 借款事实">微信转账借款</button>
+        <button class="keyword-chip" type="button" data-keyword="买卖合同 逾期付款 违约金调整">违约金调整</button>
+        <button class="keyword-chip" type="button" data-keyword="建设工程 实际施工人 工程款">实际施工人</button>
+      </div>
+      <div class="filters">
+        <div class="field">
+          <label for="cause">案由</label>
+          <select id="cause">
+            <option value="">不限案由</option>
+            <option>劳动争议</option><option>合同纠纷</option><option>民间借贷纠纷</option>
+            <option>婚姻家庭纠纷</option><option>侵权责任纠纷</option><option>公司纠纷</option><option>建设工程纠纷</option>
+          </select>
+        </div>
+        <div class="field region">
+          <label for="region">地域</label>
+          <input id="region" maxlength="80" placeholder="例如：四川 成都">
+        </div>
+        <div class="field">
+          <label for="procedure">程序</label>
+          <select id="procedure"><option value="">不限程序</option><option>一审</option><option>二审</option><option>再审</option><option>执行</option></select>
+        </div>
+        <div class="field">
+          <label for="year">裁判年份</label>
+          <select id="year"><option value="">不限年份</option><option>2026年</option><option>2025年</option><option>2024年</option><option>2023年</option><option>2022年</option><option>近五年</option></select>
+        </div>
+        <div class="field">
+          <label for="size">返回数量</label>
+          <select id="size"><option value="10">10 条</option><option value="15">15 条</option><option value="20">20 条</option></select>
+        </div>
+      </div>
+    </form>
+
+    <div class="workspace">
+      <section class="results-panel" aria-live="polite">
+        <div class="results-head"><h2>检索结果</h2><div class="results-status" id="status">等待输入关键词</div></div>
+        <div class="result-list" id="results">
+          <div class="empty"><div><div class="empty-icon">⌕</div><b>从一个争议焦点开始</b><span>建议输入 2—6 个能够区分类案的关键词，姓名、电话等个人信息无需填写。</span></div></div>
+        </div>
+      </section>
+
+      <aside class="side">
+        <section class="side-card">
+          <h2>本次检索式</h2>
+          <div class="query-box" id="queryBox">尚未生成</div>
+          <button class="ghost-button" id="copyQuery" type="button" disabled>复制检索式</button>
+        </section>
+        <section class="side-card">
+          <h2>权威数据库</h2>
+          <a class="source-link" href="https://cases.pkulaw.com/?kc=1" target="_blank" rel="noopener">北大法宝案例库 <span>↗</span></a>
+          <a class="source-link" href="https://rmfyalk.court.gov.cn/" target="_blank" rel="noopener">人民法院案例库 <span>↗</span></a>
+          <a class="source-link" href="https://wenshu.court.gov.cn/" target="_blank" rel="noopener">中国裁判文书网 <span>↗</span></a>
+        </section>
+        <section class="side-card"><p class="notice">检索结果用于法律研究辅助，不代表裁判结论。引用案号、裁判观点或文书内容前，请打开原文核验法院、日期、审级及文书状态。</p></section>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const API_URL = 'https://ance-legal-case-workbench.lxx0865.chatgpt.site/api/search-cases';
+    const $ = (selector) => document.querySelector(selector);
+    let latestQuery = '';
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
+    }
+
+    function safeUrl(value) {
+      try { const url = new URL(value); return url.protocol === 'https:' ? url.href : ''; }
+      catch { return ''; }
+    }
+
+    function caseSummary(item) {
+      return item.identified || item.content || item.refereeResult || item.caseGist || item.courtOpinion || '数据库未返回摘要，请打开原文核对裁判事实和理由。';
+    }
+
+    function renderCases(cases) {
+      if (!cases.length) {
+        $('#results').innerHTML = '<div class="empty"><div><div class="empty-icon">0</div><b>当前条件未命中案例</b><span>请删除地域或年份限制，或者把事实描述压缩为案由、行为和结果词后重试。</span></div></div>';
+        return;
+      }
+      $('#results').innerHTML = cases.map((item, index) => {
+        const title = item.title || item.caseName || '未命名案例';
+        const meta = [item.caseNumber || item.caseFlag, item.courthouseName || item.court, item.decisionDate || item.lastInstanceDate].filter(Boolean);
+        const link = safeUrl(item.url || item.link || '');
+        return `<article class="case-card">
+          <div class="case-no">RESULT ${String(index + 1).padStart(2, '0')}</div>
+          <h3>${escapeHtml(title)}</h3>
+          <div class="case-meta">${meta.map((value) => `<span>${escapeHtml(value)}</span>`).join('')}</div>
+          <p>${escapeHtml(caseSummary(item))}</p>
+          ${link ? `<a class="case-link" href="${escapeHtml(link)}" target="_blank" rel="noopener">查看数据库原文 <span>↗</span></a>` : ''}
+        </article>`;
+      }).join('');
+    }
+
+    function setLoading() {
+      $('#searchButton').disabled = true;
+      $('#searchButton').textContent = '正在检索…';
+      $('#status').textContent = '正在连接北大法宝';
+      $('#results').innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+    }
+
+    function finishLoading() {
+      $('#searchButton').disabled = false;
+      $('#searchButton').textContent = '检索案例';
+    }
+
+    async function searchCases() {
+      const payload = {
+        keyword: $('#keyword').value.trim(),
+        cause: $('#cause').value,
+        region: $('#region').value.trim(),
+        procedure: $('#procedure').value,
+        year: $('#year').value,
+        size: Number($('#size').value)
+      };
+      if (payload.keyword.length < 2) { $('#keyword').focus(); $('#status').textContent = '请至少输入两个字'; return; }
+      setLoading();
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        let data = {};
+        try { data = await response.json(); } catch {}
+        if (!response.ok) throw new Error(data.message || '检索服务暂不可用');
+        latestQuery = data.query || payload.keyword;
+        $('#queryBox').textContent = latestQuery;
+        $('#copyQuery').disabled = false;
+        $('#status').textContent = `${data.count || 0} 条 · 北大法宝实时结果`;
+        renderCases(Array.isArray(data.cases) ? data.cases : []);
+        const history = JSON.parse(localStorage.getItem('caseSearchHistory') || '[]').filter((value) => value !== payload.keyword);
+        localStorage.setItem('caseSearchHistory', JSON.stringify([payload.keyword, ...history].slice(0, 6)));
+      } catch (error) {
+        $('#status').textContent = '本次检索未完成';
+        $('#results').innerHTML = `<div class="error"><b>暂时无法返回实时案例</b><br>${escapeHtml(error.message || '请稍后重试')}。你仍可复制右侧检索式，到权威数据库继续检索。</div>`;
+        latestQuery = [payload.keyword, payload.cause, payload.region, payload.procedure, payload.year].filter(Boolean).join(' ');
+        $('#queryBox').textContent = latestQuery;
+        $('#copyQuery').disabled = false;
+      } finally { finishLoading(); }
+    }
+
+    $('#searchForm').addEventListener('submit', (event) => { event.preventDefault(); void searchCases(); });
+    $('#examples').addEventListener('click', (event) => {
+      const button = event.target.closest('[data-keyword]');
+      if (!button) return;
+      $('#keyword').value = button.dataset.keyword;
+      $('#keyword').focus();
+    });
+    $('#copyQuery').addEventListener('click', async () => {
+      if (!latestQuery) return;
+      try { await navigator.clipboard.writeText(latestQuery); $('#copyQuery').textContent = '已复制'; setTimeout(() => $('#copyQuery').textContent = '复制检索式', 1400); }
+      catch { $('#copyQuery').textContent = '请手动复制'; }
+    });
+  </script>
+</body>
+</html>
